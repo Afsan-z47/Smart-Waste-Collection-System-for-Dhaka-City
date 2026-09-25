@@ -1,0 +1,45 @@
+12 17
+Depot Karwan_Bazar Mirpur_10 Dhanmondi_6 Uttara Gulshan Motijheel Mohakhali Tejgaon Transfer_N Transfer_S Landfill
+0 1 10
+0 2 15
+0 3 8
+1 3 6
+1 6 12
+2 4 20
+2 5 18
+3 6 9
+4 5 10
+4 7 14
+5 7 8
+6 8 7
+7 8 6
+8 9 5
+8 10 5
+9 11 12
+10 11 10
+0
+2
+9 50.0
+10 40.0
+1
+11 100.0
+2
+Truck_A 6.0 240 0
+Truck_B 5.0 240 0
+8
+1 Karwan_Bazar 1 2.0 12 1
+2 Mirpur_10 2 1.6 8 2
+3 Dhanmondi_6 3 1.4 6 1
+4 Uttara 4 1.0 4 3
+5 Gulshan 5 2.5 15 2
+6 Motijheel 6 1.8 10 4
+7 Mohakhali 7 1.2 5 2
+8 Tejgaon 8 1.5 9 4
+5 5
+Source Zone_A Zone_B Transfer Landfill
+0 4
+0 1 6.0
+0 2 5.0
+1 3 4.0
+2 3 4.0
+3 4 2.0
