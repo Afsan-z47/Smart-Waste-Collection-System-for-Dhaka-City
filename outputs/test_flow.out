@@ -27,20 +27,33 @@
         - Depot_bin       1.50 t   urgency  35.8
         - Zone_B_bin      2.50 t   urgency  59.7
         - Zone_C_bin      4.00 t   urgency 100.0
-    Route: Depot -> Depot -> Zone_B -> Zone_C -> Transfer
+    Route: Depot -> Depot -> Zone_B -> Zone_C -> Transfer -> Depot
       Depot          -> Depot             0.0 min   [Depot]
       Depot          -> Zone_B           12.0 min   [Depot -> Zone_B]
       Zone_B         -> Zone_C            8.0 min   [Zone_B -> Zone_C]
       Zone_C         -> Transfer          6.0 min   [Zone_C -> Transfer]
-    Travel 26.0 min + service 18.0 min = 44.0 min  (shift 480 min)  OK
+      Transfer       -> Depot            23.0 min   [Transfer -> Zone_C -> Zone_A -> Depot]
+    Travel 49.0 min + service 18.0 min = 67.0 min  (shift 480 min)  OK
+    Tipped 8.00 t at Transfer   (station now at 8.00 / 30.00 t/day)
 
 --- 4. COLLECTION SUMMARY --------------------------------------
   Bins served          : 3 / 4
   Tonnage collected    : 8.00 t / 11.00 t
-  Fleet capacity used  : 72.7 %
+  Collection coverage  : 72.7 %
+  Fleet utilisation    : 12.5 %   (collected / truck-capacity-hours)
+  Transfer capacity    : 30.00 t/day   used 8.00 t/day
+  Landfill capacity    : 35.00 t/day
   Not collected (next cycle) : Zone_A_bin (3.00 t)
 
---- 5. MAX-FLOW / MIN-CUT ANALYSIS (Edmonds-Karp) -------------
+--- 5a. SYSTEM THROUGHPUT (built from collection result) -------
+  Stations modelled    : 1
+  Landfills modelled   : 2
+  Total collected      : 8.00 t/day
+  System max-flow      : 30.00 t/day
+  Infrastructure headroom : 22.00 t/day
+  Collection fits within disposal infrastructure.
+
+--- 5b. USER FLOW NETWORK (Edmonds-Karp) -----------------------
   Flow network : 6 nodes, 7 edges
   Source       : Source
   Sink         : Landfill
@@ -59,9 +72,9 @@
   Minimum cut (bottleneck edges):
       Transfer     -> Landfill       7.00 t/day   <-- SATURATED
 
-  The min-cut value equals the max-flow value (7.00 t/day): these edges are the
-  infrastructure bottleneck that most constrains sustainable
-  throughput and would govern any capacity-expansion decision.
+  Maximum flow : 7.00 t/day
+  Minimum cut  : 7.00 t/day
+  Verified: max-flow = min-cut (max-flow/min-cut theorem holds).
 
 ================================================================
   Dijkstra chooses efficient paths.  Greedy prioritises urgent

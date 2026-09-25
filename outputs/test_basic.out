@@ -31,32 +31,47 @@
         - Karwan_Bazar    2.00 t   urgency  80.0
         - Tejgaon         1.50 t   urgency  60.0
         - Gulshan         2.50 t   urgency 100.0
-    Route: Depot -> Karwan_Bazar -> Tejgaon -> Gulshan -> Transfer_N
+    Route: Depot -> Karwan_Bazar -> Tejgaon -> Gulshan -> Transfer_N -> Depot
       Depot          -> Karwan_Bazar     10.0 min   [Depot -> Karwan_Bazar]
       Karwan_Bazar   -> Tejgaon          19.0 min   [Karwan_Bazar -> Motijheel -> Tejgaon]
       Tejgaon        -> Gulshan          14.0 min   [Tejgaon -> Mohakhali -> Gulshan]
       Gulshan        -> Transfer_N       19.0 min   [Gulshan -> Mohakhali -> Tejgaon -> Transfer_N]
-    Travel 62.0 min + service 18.0 min = 80.0 min  (shift 240 min)  OK
+      Transfer_N     -> Depot            29.0 min   [Transfer_N -> Tejgaon -> Motijheel -> Dhanmondi_6 -> Depot]
+    Travel 91.0 min + service 18.0 min = 109.0 min  (shift 240 min)  OK
+    Tipped 6.00 t at Transfer_N   (station now at 6.00 / 50.00 t/day)
 
   Truck Truck_B   (capacity 5.0 t, shift 240 min, start Depot)
     DP knapsack picked 3 bin(s)  ->  load 4.80 t / 5.00 t,   urgency value 179.2
         - Dhanmondi_6     1.40 t   urgency  49.6
         - Motijheel       1.80 t   urgency  69.9
         - Mirpur_10       1.60 t   urgency  59.7
-    Route: Depot -> Dhanmondi_6 -> Motijheel -> Mirpur_10 -> Transfer_N
+    Route: Depot -> Dhanmondi_6 -> Motijheel -> Mirpur_10 -> Transfer_N -> Depot
       Depot          -> Dhanmondi_6       8.0 min   [Depot -> Dhanmondi_6]
       Dhanmondi_6    -> Motijheel         9.0 min   [Dhanmondi_6 -> Motijheel]
       Motijheel      -> Mirpur_10        32.0 min   [Motijheel -> Dhanmondi_6 -> Depot -> Mirpur_10]
       Mirpur_10      -> Transfer_N       37.0 min   [Mirpur_10 -> Gulshan -> Mohakhali -> Tejgaon -> Transfer_N]
-    Travel 86.0 min + service 18.0 min = 104.0 min  (shift 240 min)  OK
+      Transfer_N     -> Depot            29.0 min   [Transfer_N -> Tejgaon -> Motijheel -> Dhanmondi_6 -> Depot]
+    Travel 115.0 min + service 18.0 min = 133.0 min  (shift 240 min)  OK
+    Tipped 4.80 t at Transfer_N   (station now at 10.80 / 50.00 t/day)
 
 --- 4. COLLECTION SUMMARY --------------------------------------
   Bins served          : 6 / 8
   Tonnage collected    : 10.80 t / 13.00 t
-  Fleet capacity used  : 83.1 %
+  Collection coverage  : 83.1 %
+  Fleet utilisation    : 24.5 %   (collected / truck-capacity-hours)
+  Transfer capacity    : 90.00 t/day   used 10.80 t/day
+  Landfill capacity    : 100.00 t/day
   Not collected (next cycle) : Uttara (1.00 t), Mohakhali (1.20 t)
 
---- 5. MAX-FLOW / MIN-CUT ANALYSIS (Edmonds-Karp) -------------
+--- 5a. SYSTEM THROUGHPUT (built from collection result) -------
+  Stations modelled    : 2
+  Landfills modelled   : 1
+  Total collected      : 10.80 t/day
+  System max-flow      : 90.00 t/day
+  Infrastructure headroom : 79.20 t/day
+  Collection fits within disposal infrastructure.
+
+--- 5b. USER FLOW NETWORK (Edmonds-Karp) -----------------------
   Flow network : 5 nodes, 5 edges
   Source       : Source
   Sink         : Landfill
@@ -73,9 +88,9 @@
   Minimum cut (bottleneck edges):
       Transfer     -> Landfill       2.00 t/day   <-- SATURATED
 
-  The min-cut value equals the max-flow value (2.00 t/day): these edges are the
-  infrastructure bottleneck that most constrains sustainable
-  throughput and would govern any capacity-expansion decision.
+  Maximum flow : 2.00 t/day
+  Minimum cut  : 2.00 t/day
+  Verified: max-flow = min-cut (max-flow/min-cut theorem holds).
 
 ================================================================
   Dijkstra chooses efficient paths.  Greedy prioritises urgent
