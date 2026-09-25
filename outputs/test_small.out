@@ -1,0 +1,60 @@
+================================================================
+  SMART WASTE COLLECTION SYSTEM  -  DHAKA CITY
+  Sensor-driven route optimisation & capacity-aware scheduling
+================================================================
+
+--- 1. ROAD NETWORK --------------------------------------------
+  Nodes : 5      Edges : 5
+  Depot : Depot (node 0)
+  Transfer stations : Transfer (node 3, cap 100.0 t/day)
+  Landfills         : Landfill (node 4, cap 100.0 t/day)
+  Unreachable nodes from depot : 0
+
+--- 2. GREEDY URGENCY PRIORITISATION ---------------------------
+  urgency = 100 * (0.60 * normalised_fill + 0.40 * normalised_age)
+
+  Rank  Bin               Zone   Fill(t)  Age(h)   Urgency
+  --------------------------------------------------------
+  1     Bin_A                1      2.00    10.0     100.0
+  2     Bin_B                1      1.50     5.0      65.0
+
+--- 3. CAPACITY-AWARE SELECTION & ROUTING (per truck) ----------
+
+  Truck Truck_1   (capacity 5.0 t, shift 200 min, start Depot)
+    DP knapsack picked 2 bin(s)  ->  load 3.50 t / 5.00 t,   urgency value 165.0
+        - Bin_A           2.00 t   urgency 100.0
+        - Bin_B           1.50 t   urgency  65.0
+    Route: Depot -> Bin_A -> Bin_B -> Transfer
+      Depot          -> Bin_A             5.0 min   [Depot -> Bin_A]
+      Bin_A          -> Bin_B             8.0 min   [Bin_A -> Transfer -> Bin_B]
+      Bin_B          -> Transfer          4.0 min   [Bin_B -> Transfer]
+    Travel 17.0 min + service 12.0 min = 29.0 min  (shift 200 min)  OK
+
+--- 4. COLLECTION SUMMARY --------------------------------------
+  Bins served          : 2 / 2
+  Tonnage collected    : 3.50 t / 3.50 t
+  Fleet capacity used  : 100.0 %
+
+--- 5. MAX-FLOW / MIN-CUT ANALYSIS (Edmonds-Karp) -------------
+  Flow network : 3 nodes, 2 edges
+  Source       : Source
+  Sink         : Landfill
+
+  Edge capacities:
+      Source       -> Transfer      10.00 t/day
+      Transfer     -> Landfill       5.00 t/day
+
+  Maximum feasible throughput : 5.00 t/day
+
+  Minimum cut (bottleneck edges):
+      Transfer     -> Landfill       5.00 t/day   <-- SATURATED
+
+  The min-cut value equals the max-flow value (5.00 t/day): these edges are the
+  infrastructure bottleneck that most constrains sustainable
+  throughput and would govern any capacity-expansion decision.
+
+================================================================
+  Dijkstra chooses efficient paths.  Greedy prioritises urgent
+  bins.  Dynamic programming respects truck capacity.  Max-flow
+  exposes infrastructure bottlenecks.  One coordinated framework.
+================================================================

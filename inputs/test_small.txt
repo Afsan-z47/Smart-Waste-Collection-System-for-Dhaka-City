@@ -1,4 +1,4 @@
-5 4
+5 5
 Depot Bin_A Bin_B Transfer Landfill
 0 1 5
 0 2 6
