@@ -1,0 +1,15 @@
+3 2
+Depot Bin Transfer
+0 1 2
+1 2 2
+0
+1
+2 10.0
+1
+2 10.0
+1
+Truck_A 5.0 60 0
+2
+1 Empty 1 0.0 0.0 1
+2 EmptyToo 1 0.0 0.0 2
+0 0

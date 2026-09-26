@@ -1,83 +1,72 @@
-# Waste Collection System
+# Smart Waste Collection System - Rigorous Tests
 
-## Directory layout
+This directory follows the same layout as the project test setup:
 
-```
-.
-├── waste.cpp
-├── run_tests.sh
-├── inputs/
-│   ├── test1_basic.txt
-│   ├── test2_small.txt
-│   └── test3_flow.txt
-└── outputs/            (created by the script)
-```
+    inputs/    test input files
+    outputs/   captured program output
+    run_tests.sh
 
----
+Build the program in the parent project directory first:
 
-## Test 1 — `inputs/test1_basic.txt`
+    g++ -O2 -std=c++17 -Wall -Wextra -pedantic -o waste waste.cpp
 
-A realistic 12-node Dhaka road graph, 2 trucks, 8 bins, 2 transfer stations, 1 landfill, and a small flow network.
+Then run:
 
+    bash run_tests.sh
 
-**Expected key results for Test 1**
+The tests are intentionally small so that each algorithmic property is easy to inspect.
 
-| Stage | Expected |
-|---|---|
-| Unreachable nodes from depot | 0 |
-| Urgency ranking (top) | Gulshan 100.0, Karwan_Bazar 80.0, Motijheel 69.9, Tejgaon 60.0 |
-| Truck_A DP pick | Gulshan + Karwan_Bazar + Tejgaon = **6.00 t** (urgency value 2400.0) |
-| Truck_A route | Depot → Karwan_Bazar → Tejgaon → Gulshan → Transfer_N |
-| Truck_A total | travel ≈ 62.0 min + service 18.0 min = **80.0 min** (shift 240 → OK) |
-| Truck_B DP pick | Motijheel + Mirpur_10 + Dhanmondi_6 = **4.80 t** (value 1792.0) |
-| Truck_B route | Depot → Dhanmondi_6 → Motijheel → Mirpur_10 → Transfer_N |
-| Truck_B total | travel ≈ 86.0 min + service 18.0 min = **104.0 min** (OK) |
-| Bins served | **6 / 8** |
-| Tonnage collected | **10.80 t / 13.50 t** |
-| Not collected | Uttara (1.00 t), Mohakhali (1.20 t) |
-| Max-flow | **2.00 t/day** |
-| Min-cut | `Transfer -> Landfill` (cap 2.00) |
+## Tests
 
----
+### test_normal.txt
+Normal integrated case using Dijkstra, greedy urgency, 0/1 knapsack, routing, transfer stations and a user flow network.
 
-## Test 2 — `inputs/test2_small.txt`
+### test_knapsack_exact.txt
+Three bins with a 5 t truck. A=3 t and B=2 t together give 155 urgency points, while C=4 t gives 96, so the DP stage should prefer A+B.
 
-Minimal 5-node graph, 1 truck, 2 bins — easy to verify by hand.
+### test_tight_shift.txt
+The truck has enough payload capacity for all three bins, but the full route cannot fit the 30-minute shift. This exercises route-feasibility pruning.
 
+### test_transfer_capacity.txt
+Two 4 t trucks share a transfer station with only 4 t/day capacity. The first truck may consume the station's capacity; the second must not push station usage above 4 t/day.
 
+### test_unreachable.txt
+One bin lies outside the depot's connected component. It must not become a collection candidate.
 
-**Expected key results**
+### test_zero_values.txt
+All bins have zero fill and zero age. Exercises the maxFill/maxHours zero normalization paths without division-by-zero.
 
-| Stage | Expected |
-|---|---|
-| Urgency | Bin_A = 100.0, Bin_B = 65.0 |
-| DP pick | Bin_A + Bin_B = **3.50 t** (value 1650.0) |
-| Route | Depot → Bin_A → Bin_B → Transfer |
-| Total time | travel 17.0 + service 12.0 = **29.0 min** (shift 200 → OK) |
-| Bins served | **2 / 2** |
-| Tonnage collected | **3.50 / 3.50 t** |
-| Max-flow | **5.00 t/day** |
-| Min-cut | `Transfer -> Landfill` (cap 5.00) |
+### test_no_transfer.txt
+There are bins but no transfer station. A collection route should not be considered fully disposed/tipped.
 
----
+### test_flow_classic.txt
+Classic Edmonds-Karp regression network. Expected maximum flow and minimum cut are both 23 t/day.
 
-## Test 3 — `inputs/test3_flow.txt`
+### test_flow_bottleneck.txt
+The generated transfer/landfill network has 7 t/day total landfill capacity, while collection can reach 8 t/day. Expected system max-flow is 7 t/day.
 
-Designed so the flow network's bottleneck is a single edge with cap 7, and routing has multiple trucks' worth of bins in one load.
+### test_station_exhaustion.txt
+Same capacity-exhaustion scenario as test_transfer_capacity, kept separately for quick regression testing when changing station accounting.
 
+### test_invalid_negative_edge.txt
+Must exit non-zero because a negative Dijkstra edge weight is rejected.
 
-**Expected key results**
+### test_invalid_node.txt
+Must exit non-zero because road endpoint 9 is outside the declared V=3 node range.
 
-| Stage | Expected |
-|---|---|
-| Urgency | Zone_C_bin 100.0, Zone_A_bin 76.1, Zone_B_bin 59.7, Depot_bin 35.8 |
-| DP pick | Zone_C_bin + Zone_B_bin + Depot_bin = **8.00 t exactly** (value 1955.0) |
-| Route | Depot → Depot_bin → Zone_B_bin → Zone_C_bin → Transfer |
-| Total time | travel 26.0 + service 18.0 = **44.0 min** (shift 480 → OK) |
-| Bins served | **4 / 4** |
-| Tonnage collected | **11.00 / 11.00 t** |
-| Max-flow | **7.00 t/day** |
-| Min-cut | `Transfer -> Landfill` (cap 7.00) — clear bottleneck |
+## Important parser note
 
-The flow network is engineered so that although **9 t/day** can physically arrive at `Transfer`, the single outgoing edge `Transfer → Landfill` (cap 7) caps the system; the min-cut is therefore that one edge.
+Do not add `// comments` to the input files. The parser uses `operator>>` tokens and does not implement comment syntax.
 
+## What this suite is meant to catch
+
+- shortest-path and reachability mistakes
+- incorrect 0/1 knapsack reconstruction
+- shift-feasibility failures
+- transfer-capacity overflow
+- accidental selection of unreachable bins
+- zero-normalization / divide-by-zero problems
+- routes with no disposal station
+- Edmonds-Karp residual-network errors
+- incorrect min-cut extraction
+- invalid-input handling

@@ -1,0 +1,47 @@
+================================================================
+  SMART WASTE COLLECTION SYSTEM  -  DHAKA CITY
+  Sensor-driven route optimisation & capacity-aware scheduling
+================================================================
+
+--- 1. ROAD NETWORK --------------------------------------------
+  Nodes : 4      Edges : 3
+  Depot : Depot (node 0)
+  Transfer stations : 
+  Landfills         : Landfill (node 3, cap 100.0 t/day)
+  Unreachable nodes from depot : 0
+
+--- 2. GREEDY URGENCY PRIORITISATION ---------------------------
+  urgency = 100 * (0.60 * normalised_fill + 0.40 * normalised_age)
+
+  Rank  Bin               Zone   Fill(t)  Age(h)   Urgency
+  --------------------------------------------------------
+  1     A                    1      2.00    10.0     100.0
+  2     B                    1      2.00     8.0      92.0
+
+--- 3. CAPACITY-AWARE SELECTION & ROUTING (per truck) ----------
+
+  Truck Truck_A   (capacity 5.0 t, shift 60 min, start Depot)
+    No shift-feasible route could be built.
+
+--- 4. COLLECTION SUMMARY --------------------------------------
+  Bins served          : 0 / 2
+  Tonnage collected    : 0.00 t / 4.00 t
+  Collection coverage  : 0.0 %
+  Fleet payload usage  : 0.0 %   (collected / aggregate truck payload)
+  Transfer capacity    : 0.00 t/day   used 0.00 t/day
+  Landfill capacity    : 100.00 t/day
+  Not collected (next cycle) : A (2.00 t), B (2.00 t)
+
+--- 5a. SYSTEM THROUGHPUT (built from collection result) -------
+  Stations modelled    : 0
+  Landfills modelled   : 1
+  Total collected      : 0.00 t/day
+  System max-flow      : 0.00 t/day
+  Infrastructure headroom : 0.00 t/day
+  Collection fits within disposal infrastructure.
+
+================================================================
+  Dijkstra chooses efficient paths.  Greedy prioritises urgent
+  bins.  Dynamic programming respects truck capacity.  Max-flow
+  exposes infrastructure bottlenecks.  One coordinated framework.
+================================================================

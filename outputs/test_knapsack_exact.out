@@ -1,0 +1,58 @@
+================================================================
+  SMART WASTE COLLECTION SYSTEM  -  DHAKA CITY
+  Sensor-driven route optimisation & capacity-aware scheduling
+================================================================
+
+--- 1. ROAD NETWORK --------------------------------------------
+  Nodes : 6      Edges : 7
+  Depot : Depot (node 0)
+  Transfer stations : Transfer (node 4, cap 20.0 t/day)
+  Landfills         : Landfill (node 5, cap 50.0 t/day)
+  Unreachable nodes from depot : 1
+
+--- 2. GREEDY URGENCY PRIORITISATION ---------------------------
+  urgency = 100 * (0.60 * normalised_fill + 0.40 * normalised_age)
+
+  Rank  Bin               Zone   Fill(t)  Age(h)   Urgency
+  --------------------------------------------------------
+  1     C                    1      4.00     8.0      92.0
+  2     A                    1      3.00    10.0      85.0
+  3     B                    1      2.00    10.0      70.0
+
+--- 3. CAPACITY-AWARE SELECTION & ROUTING (per truck) ----------
+
+  Truck Truck_A   (capacity 5.0 t, shift 120 min, start Depot)
+    DP knapsack picked 2 bin(s)  ->  load 5.00 t / 5.00 t,   urgency value 155.0
+        - B               2.00 t   urgency  70.0
+        - A               3.00 t   urgency  85.0
+    Route: Depot -> Bin_B -> Bin_A -> Transfer -> Depot
+      Depot          -> Bin_B             2.0 min   [Depot -> Bin_B]
+      Bin_B          -> Bin_A             1.0 min   [Bin_B -> Bin_A]
+      Bin_A          -> Transfer          2.0 min   [Bin_A -> Transfer]
+      Transfer       -> Depot             4.0 min   [Transfer -> Bin_A -> Depot]
+    Travel 9.0 min + service 12.0 min = 21.0 min  (shift 120 min)  OK
+    Tipped 5.00 t at Transfer   (station now at 5.00 / 20.00 t/day)
+
+--- 4. COLLECTION SUMMARY --------------------------------------
+  Bins served          : 2 / 3
+  Tonnage collected    : 5.00 t / 9.00 t
+  Collection coverage  : 55.6 %
+  Fleet payload usage  : 100.0 %   (collected / aggregate truck payload)
+  Transfer capacity    : 20.00 t/day   used 5.00 t/day
+  Landfill capacity    : 50.00 t/day
+  Not collected (next cycle) : C (4.00 t)
+
+--- 5a. SYSTEM THROUGHPUT (built from collection result) -------
+  Stations modelled    : 1
+  Landfills modelled   : 1
+  Total collected      : 5.00 t/day
+  System max-flow      : 0.00 t/day
+  Infrastructure headroom : -5.00 t/day
+  >>> BOTTLENECK: 5.00 t/day cannot be disposed with current
+      transfer / landfill capacity.
+
+================================================================
+  Dijkstra chooses efficient paths.  Greedy prioritises urgent
+  bins.  Dynamic programming respects truck capacity.  Max-flow
+  exposes infrastructure bottlenecks.  One coordinated framework.
+================================================================

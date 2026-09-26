@@ -40,7 +40,7 @@
   Bins served          : 3 / 4
   Tonnage collected    : 8.00 t / 11.00 t
   Collection coverage  : 72.7 %
-  Fleet utilisation    : 12.5 %   (collected / truck-capacity-hours)
+  Fleet payload usage  : 100.0 %   (collected / aggregate truck payload)
   Transfer capacity    : 30.00 t/day   used 8.00 t/day
   Landfill capacity    : 35.00 t/day
   Not collected (next cycle) : Zone_A_bin (3.00 t)

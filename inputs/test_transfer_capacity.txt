@@ -1,0 +1,17 @@
+4 3
+Depot Bin_A Transfer Landfill
+0 1 2
+1 2 2
+2 3 2
+0
+1
+2 4.0
+1
+3 100.0
+2
+Truck_A 4.0 60 0
+Truck_B 4.0 60 0
+2
+1 A 1 4.0 10 1
+2 B 1 4.0 9 1
+0 0

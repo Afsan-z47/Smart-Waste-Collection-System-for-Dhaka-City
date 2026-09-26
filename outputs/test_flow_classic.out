@@ -1,0 +1,64 @@
+================================================================
+  SMART WASTE COLLECTION SYSTEM  -  DHAKA CITY
+  Sensor-driven route optimisation & capacity-aware scheduling
+================================================================
+
+--- 1. ROAD NETWORK --------------------------------------------
+  Nodes : 2      Edges : 0
+  Depot : Source (node 0)
+  Transfer stations : 
+  Landfills         : 
+  Unreachable nodes from depot : 1
+
+--- 2. GREEDY URGENCY PRIORITISATION ---------------------------
+  urgency = 100 * (0.60 * normalised_fill + 0.40 * normalised_age)
+
+  Rank  Bin               Zone   Fill(t)  Age(h)   Urgency
+  --------------------------------------------------------
+
+--- 3. CAPACITY-AWARE SELECTION & ROUTING (per truck) ----------
+
+--- 4. COLLECTION SUMMARY --------------------------------------
+  Bins served          : 0 / 0
+  Tonnage collected    : 0.00 t / 0.00 t
+  Collection coverage  : 0.0 %
+  Fleet payload usage  : 0.0 %   (collected / aggregate truck payload)
+  Transfer capacity    : 0.00 t/day   used 0.00 t/day
+  Landfill capacity    : 0.00 t/day
+
+--- 5a. SYSTEM THROUGHPUT (built from collection result) -------
+  No transfer stations or landfills defined.
+
+--- 5b. USER FLOW NETWORK (Edmonds-Karp) -----------------------
+  Flow network : 8 nodes, 10 edges
+  Source       : Source
+  Sink         : Sink
+
+  Edge capacities:
+      Source       -> V1            16.00 t/day
+      Source       -> V2            13.00 t/day
+      V1           -> V2            10.00 t/day
+      V2           -> V1             4.00 t/day
+      V1           -> V3            12.00 t/day
+      V2           -> V4            14.00 t/day
+      V3           -> V2             9.00 t/day
+      V4           -> V3             7.00 t/day
+      V3           -> Sink          20.00 t/day
+      V4           -> Sink           4.00 t/day
+
+  Maximum feasible throughput : 23.00 t/day
+
+  Minimum cut (bottleneck edges):
+      V1           -> V3            12.00 t/day   <-- SATURATED
+      V4           -> V3             7.00 t/day   <-- SATURATED
+      V4           -> Sink           4.00 t/day   <-- SATURATED
+
+  Maximum flow : 23.00 t/day
+  Minimum cut  : 23.00 t/day
+  Verified: max-flow = min-cut (max-flow/min-cut theorem holds).
+
+================================================================
+  Dijkstra chooses efficient paths.  Greedy prioritises urgent
+  bins.  Dynamic programming respects truck capacity.  Max-flow
+  exposes infrastructure bottlenecks.  One coordinated framework.
+================================================================

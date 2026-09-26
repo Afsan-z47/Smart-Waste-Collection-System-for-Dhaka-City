@@ -226,34 +226,37 @@ RoutePlan buildPlan(int startNode,
         p.serviceTime += SERVICE_MIN;
     }
 
-    /* nearest transfer station with room for the whole load */
+    /* Require one transfer station to accept the COMPLETE truck load.
+       Partial dumping would violate the stated daily intake constraint. */
     int    bestTS = -1;
     double bd     = INF;
     for (size_t i = 0; i < transfers.size(); ++i) {
         if (transfers[i].remaining() + EPS < p.load) continue;
         double d = travel(cur, transfers[i].node);
+        if (d >= INF / 2) continue;
         if (d < bd) { bd = d; bestTS = (int)i; }
     }
-    /* fallback: nearest station with any room at all (partial dump) */
+
+    /* No legal disposal station means this route is infeasible. */
     if (bestTS < 0) {
-        for (size_t i = 0; i < transfers.size(); ++i) {
-            if (transfers[i].remaining() <= EPS) continue;
-            double d = travel(cur, transfers[i].node);
-            if (d < bd) { bd = d; bestTS = (int)i; }
-        }
+        p.totalTime = INF;
+        return p;
     }
-    if (bestTS >= 0) {
-        p.travelTime += bd;
-        p.nodes.push_back(transfers[bestTS].node);
-        p.tsIndex = bestTS;
-        p.tsOverflow = (transfers[bestTS].used + p.load >
-                        transfers[bestTS].capacity + EPS);
-        cur = transfers[bestTS].node;
-    }
+
+    p.travelTime += bd;
+    p.nodes.push_back(transfers[bestTS].node);
+    p.tsIndex = bestTS;
+    p.tsOverflow = false;
+    cur = transfers[bestTS].node;
 
     /* return to depot */
     if (cur != depot) {
-        p.travelTime += travel(cur, depot);
+        double back = travel(cur, depot);
+        if (back >= INF / 2) {
+            p.totalTime = INF;
+            return p;
+        }
+        p.travelTime += back;
         p.nodes.push_back(depot);
     }
 
@@ -552,30 +555,41 @@ int main() {
             plan = buildPlan(tr.start, order, bins, transfers, depot);
             if (plan.totalTime <= tr.shift + EPS) { havePlan = true; break; }
 
-            int    n          = (int)selected.size();
+            const vector<int>& routeOrder = plan.stops;
+            int    n          = (int)routeOrder.size();
             int    worst      = -1;
             double worstRatio = -1.0;
 
             for (int i = 0; i < n; ++i) {
                 int prevNode = (i == 0)
                              ? tr.start
-                             : bins[selected[i - 1]].node;
-                int nextNode = (i == n - 1)
-                             ? plan.nodes.back()
-                             : bins[selected[i + 1]].node;
-                int here = bins[selected[i]].node;
+                             : bins[routeOrder[i - 1]].node;
+                int nextNode;
+                if (i + 1 < n)
+                    nextNode = bins[routeOrder[i + 1]].node;
+                else if (plan.tsIndex >= 0)
+                    nextNode = transfers[plan.tsIndex].node;
+                else
+                    nextNode = depot;
+
+                int here = bins[routeOrder[i]].node;
 
                 double detour = travel(prevNode, here)
                               + travel(here, nextNode)
                               - travel(prevNode, nextNode);
                 if (detour < 0) detour = 0;
 
-                double ratio = detour / (bins[selected[i]].urgency + EPS);
-                if (ratio > worstRatio) { worstRatio = ratio; worst = i; }
+                double ratio = detour / (bins[routeOrder[i]].urgency + EPS);
+                if (ratio > worstRatio) {
+                    worstRatio = ratio;
+                    worst = i;
+                }
             }
+
             if (worst < 0) { selected.pop_back(); continue; }
-            deferred.push_back(selected[worst]);
-            selected.erase(selected.begin() + worst);
+            deferred.push_back(routeOrder[worst]);
+            selected.erase(remove(selected.begin(), selected.end(), routeOrder[worst]),
+                           selected.end());
         }
 
         if (!havePlan) {
@@ -663,14 +677,14 @@ int main() {
 
     double totalFleetCap = 0.0;
     for (int i = 0; i < T; ++i)
-        totalFleetCap += trucks[i].capacity * (trucks[i].shift / 60.0);
+        totalFleetCap += trucks[i].capacity;
 
     cout << "  Collection coverage  : " << setprecision(1)
          << (totalWaste    > EPS ? 100.0 * totalCollected / totalWaste    : 0.0)
          << " %\n";
-    cout << "  Fleet utilisation    : " << setprecision(1)
+    cout << "  Fleet payload usage  : " << setprecision(1)
          << (totalFleetCap > EPS ? 100.0 * totalCollected / totalFleetCap : 0.0)
-         << " %   (collected / truck-capacity-hours)\n";
+         << " %   (collected / aggregate truck payload)\n";
 
     double totalTransferCap = 0.0, totalTransferUsed = 0.0;
     for (int i = 0; i < K; ++i) {

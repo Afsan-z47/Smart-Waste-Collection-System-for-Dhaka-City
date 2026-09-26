@@ -1,0 +1,16 @@
+6 3
+Depot Reachable Transfer Isolated Bin_Unreachable Landfill
+0 1 5
+1 2 5
+2 5 5
+0
+1
+2 20.0
+1
+5 20.0
+1
+Truck_A 5.0 120 0
+2
+1 ReachableBin 1 2.0 8 1
+2 IsolatedBin 4 2.0 12 1
+0 0
