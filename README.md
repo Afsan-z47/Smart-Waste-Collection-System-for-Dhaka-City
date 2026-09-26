@@ -1,5 +1,20 @@
 # Smart Waste Collection System for Dhaka City
 
+
+> Assignment 4
+> CSE 4403 (Algorithms)
+
+#### Group ID: 4
+ - Student 1 ID: 230041132
+ - Student 2 ID: 230041149
+ - Student 3 ID: 230041154
+
+> Video: https://youtu.be/PsrVigAg2Vw?si=rgChVIaiCZV8gzL
+
+> Source Code / GitHub: https://github.com/Afsan-z47/Smart-Waste-Collection-System-for-Dhaka-City
+
+
+
 ## 1. Problem Selection and Justification
 
 ### 1.1 Selected Problem
