@@ -1860,11 +1860,3 @@ Min-Cut
 
 ---
 
-## Appendix C — Submission Links
-
-**Video:**
-`[Insert YouTube link here]`
-
-**Source Code / GitHub:**
-`[Insert GitHub repository link here]`
-
